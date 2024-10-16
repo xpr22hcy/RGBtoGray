@@ -15,7 +15,6 @@ if 'True' == Cfg.getConfStr('photo', 'UseTkWindow', 'True'):
 (filepath, tempfilename) = os.path.split(filename)# 分离路径和文件名
 (filename_noext, extension) = os.path.splitext(tempfilename)#分离文件名和后缀
 generatefilepath = "./" + filename_noext +"/"
-print(generatefilepath)
 NEWPHOTOPATH = generatefilepath + NEWPHOTONAME + tempfilename
 
 #1、读取图像，并把图像转换为灰度图像并显示
@@ -25,12 +24,14 @@ im_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)   #转换了灰度化
 cv2.imshow("test_imread", im_gray)
 cv2.waitKey()
 
-array_bytes = [[]]
+array_bytes = []
+array_bytes_column = []
 
 num = 0
 s = 0
 for i in im_gray:
     array = []
+    array_column = []
     m = 0
     for j in i:
         num += 1
@@ -38,12 +39,16 @@ for i in im_gray:
         stri = stri[2:].zfill(2)
         stri = f'0x{stri}'
         array.append(stri)
+
+        if s == 0:
+            array_bytes_column.append([])
+        array_bytes_column[m].append(stri)
+
         m += 1
     s += 1
     array_bytes.append(array)
 
 content = str(array_bytes)
-content = content.replace('[[], [', '')
 content = content.replace('\'', '')
 content = content.replace('], [', ',\n')
 content = content.replace('[', '')
@@ -57,6 +62,18 @@ content = content.replace(']', '')
 # content = content.replace(']', '')
 
 string = f'const unsigned char gImage_[{num}] = '
+string += "{\n"
+string += content
+string += "\n};"
+
+content = str(array_bytes_column)
+content = content.replace('\'', '')
+content = content.replace('], [', ',\n')
+content = content.replace('[', '')
+content = content.replace(']', '')
+
+string += f'\n\n/* 在原数组的基础上行与列交换过的数组 */ '
+string += f'\nconst unsigned char gImage_column[{num}] = '
 string += "{\n"
 string += content
 string += "\n};"
