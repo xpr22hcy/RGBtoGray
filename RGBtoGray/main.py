@@ -1,8 +1,8 @@
-import cv2
 from alanbasepy import *
 import os
-# import numpy as np
-# np.set_printoptions(threshold=np.inf) #设置打印不省略
+from PIL import Image
+import numpy as np
+np.set_printoptions(threshold=np.inf) #设置打印不省略
 
 FILENAME = 'array_bytes.c'
 NEWPHOTONAME = 'Gray_'
@@ -17,25 +17,27 @@ if 'True' == Cfg.getConfStr('photo', 'UseTkWindow', 'True'):
 generatefilepath = "./" + filename_noext +"/"
 NEWPHOTOPATH = generatefilepath + NEWPHOTONAME + tempfilename
 
-#1、读取图像，并把图像转换为灰度图像并显示
-img = cv2.imread(filename)  #读取图片
-im_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)   #转换了灰度化
+image = Image.open(filename)
+image_array = np.array(image)
+if len(image_array.shape) == 3:
+    if image_array.shape[2] == 2: # 16bit
+        image = image.convert('L')
+        image_array = np.array(image)
+    elif image_array.shape[2] == 3: # 24bit
+        image = image.convert('L')
+        image_array = np.array(image)
 
-cv2.imshow("test_imread", im_gray)
-cv2.waitKey()
+num = image_array.shape[0] * image_array.shape[1]
 
 array_bytes = []
 array_bytes_column = []
 
-num = 0
 s = 0
-for i in im_gray:
+for i in image_array:
     array = []
-    array_column = []
     m = 0
     for j in i:
-        num += 1
-        stri = hex(im_gray[s][m])
+        stri = hex(image_array[s][m])
         stri = stri[2:].zfill(2)
         stri = f'0x{stri}'
         array.append(stri)
@@ -53,13 +55,6 @@ content = content.replace('\'', '')
 content = content.replace('], [', ',\n')
 content = content.replace('[', '')
 content = content.replace(']', '')
-
-# content = str(im_gray)
-# content = ','.join(content.split())
-# content = content.replace('[,', '')
-# content = content.replace('],', ',\n')
-# content = content.replace('[', '')
-# content = content.replace(']', '')
 
 string = f'const unsigned char gImage_[{num}] = '
 string += "{\n"
@@ -83,4 +78,5 @@ delPathAllFile(generatefilepath)
 writeFile(generatefilepath + FILENAME, 'w+', string, end='')
 print("已生成测试步骤文件")
 
-cv2.imwrite(NEWPHOTOPATH, im_gray)
+image.save(NEWPHOTOPATH)
+print("已生成灰度图片")
