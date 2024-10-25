@@ -2,7 +2,7 @@ from alanbasepy import *
 import os
 from PIL import Image
 import numpy as np
-# np.set_printoptions(threshold=np.inf) #设置打印不省略
+np.set_printoptions(threshold=np.inf) #设置打印不省略
 
 NEWPHOTONAME = 'Gray_'
 
@@ -13,6 +13,7 @@ class photo:
         self.fillvalue = '0x00'
         self.fillflag = True
         self.reversal = True
+        self.arraynmae = 'gImage_1'
         return
 
     def open(self, file):
@@ -30,10 +31,10 @@ class photo:
     def imagechange(self):
         if len(self.image_array.shape) == 2: # 8bit
             self.image_gray = self.image_resize
-            self.image_array = np.array(self.image_gray)
+            self.image_gray_array = np.array(self.image_gray)
         else:
             self.image_gray = self.image_resize.convert('L')
-            self.image_array = np.array(self.image_gray)
+            self.image_gray_array = np.array(self.image_gray)
         # if len(self.image_array.shape) == 3:
         #     if self.image_array.shape[2] == 2: # 16bit
         #         self.image_gray = self.image.convert('L')
@@ -52,10 +53,12 @@ class photo:
         self.filesize = self.piecesize
         if len(self.image_array.shape) == 2: # 8bit
             self.image_gray = self.image_resize
-            self.image_array = np.array(self.image_gray)
+            self.image_gray_array = np.array(self.image_gray)
+            print(self.image_array)
         else:
             self.image_gray = self.image_resize.convert('L')
-            self.image_array = np.array(self.image_gray)
+            self.image_gray_array = np.array(self.image_gray)
+            # print(np.array(self.image_resize))
 
     def save_gray(self):
         self.num = self.image_gray.size[0] * self.image_gray.size[1]
@@ -64,11 +67,11 @@ class photo:
         self.array_bytes_column = []
 
         s = 0
-        for i in self.image_array:
+        for i in self.image_gray_array:
             array = []
             m = 0
             for j in i:
-                stri = hex(self.image_array[s][m])
+                stri = hex(self.image_gray_array[s][m])
                 stri = stri[2:].zfill(2)
                 stri = f'0x{stri}'
                 array.append(stri)
@@ -104,7 +107,7 @@ class photo:
         else:
             linelength = self.image_gray.size[0]
 
-        string = f'const unsigned char gImage_[{self.num}] = '
+        string = f'const unsigned char {self.arraynmae}[{self.num}] = '
         string += "{\n"
         string += content
         if self.fillflag:
