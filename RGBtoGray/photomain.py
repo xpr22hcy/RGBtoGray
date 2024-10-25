@@ -35,7 +35,6 @@ height.place(x=10, y=130)
 text1 = tk.Text(root, height=1, width=8, relief="flat", fg="black", cursor="arrow")
 text1.place(x=10, y=70)
 text1.insert('0.0', 'size:')
-text1_var = tk.StringVar()
 
 fill = tk.StringVar()
 fillone = tk.Checkbutton(root, text="填充", variable=fill, onvalue="填充",offvalue="不填充")

@@ -6,6 +6,11 @@ from photo import photo
 from video import video
 from tkinter import filedialog
 
+Text_x_Place = 10
+Stn_x_Place = 30
+Cek_x_Place = 20
+Lab_x_Place = 50
+
 Stn_Gray_Place = 170
 Stn_save2_Place = 200
 Stn_save_Place = 230
@@ -18,47 +23,46 @@ def hide_fun(component):
 
 root = tk.Tk()  # 这个库里面有Tk()这个方法，这个方法的作用就是创建一个窗口
 root.title('视频转数组工具')
-root.geometry("700x500+300+80")  # (宽度x高度)+(x轴+y轴)
+root.geometry("720x500+300+80")  # (宽度x高度)+(x轴+y轴)
 
 btnopen = tk.Button(root, text="打开视频", width=8, height=1, font=("黑体", 8), bg='#D8C8CE', fg="black")# 创建按钮，并且将按钮放到窗口里面
-btnopen.place(x=10, y=30)
+btnopen.place(x=Stn_x_Place, y=30)
 btnstart = tk.Button(root, text="开始处理", width=8, height=1, font=("黑体", 8), bg='#D8C8CE', fg="black")# 创建按钮，并且将按钮放到窗口里面
-btnstart.place(x=10, y=Stn_Gray_Place)
+btnstart.place(x=Stn_x_Place, y=Stn_Gray_Place)
 btnsave = tk.Button(root, text="自动保存", width=8, height=1, font=("黑体", 8), bg='#D8C8CE', fg="black")# 创建按钮，并且将按钮放到窗口里面
 hide_fun(btnsave)
 btnsave2 = tk.Button(root, text="另存为", width=8, height=1, font=("黑体", 8), bg='#D8C8CE', fg="black")# 创建按钮，并且将按钮放到窗口里面
 hide_fun(btnsave2)
 length = tk.Entry(root, width=8)
-length.place(x=10, y=100)
+length.place(x=Lab_x_Place, y=100)
 height = tk.Entry(root, width=8)
-height.place(x=10, y=130)
+height.place(x=Lab_x_Place, y=130)
 
-text1 = tk.Text(root, height=1, width=8, relief="flat", fg="black", cursor="arrow")
-text1.place(x=10, y=70)
-text1.insert('0.0', 'size:')
-text1_var = tk.StringVar()
+text1 = tk.Text(root, height=1, width=14, relief="flat", fg="black", cursor="arrow")
+text1.place(x=Text_x_Place, y=80)
+text1.insert('0.0', 'pixel size')
 
 fill = tk.StringVar()
 fillone = tk.Checkbutton(root, text="填充", variable=fill, onvalue="填充",offvalue="不填充")
 fill.set("填充")
-fillone.place(x=10, y=310)
+fillone.place(x=Cek_x_Place, y=300)
 
 fill_value = tk.Entry(root, width=8)
-fill_value.place(x=10, y=330)
+fill_value.place(x=Lab_x_Place, y=330)
 
 com = ttk.Combobox(root, width=6)     #创建下拉菜单
-com.place(x=10, y=360)
+com.place(x=Lab_x_Place, y=360)
 com["value"] = ("128", "256", "1024", "2048", "4096")    #给下拉菜单设定值
 com.current(3)     #设定下拉菜单的默认值为第3个
 
 reversal = tk.StringVar()
 reversalone = tk.Checkbutton(root, text="行列反转", variable=reversal, onvalue="反转",offvalue="不反转")
 reversal.set("反转")
-reversalone.place(x=10, y=290)
+reversalone.place(x=Cek_x_Place, y=280)
  
-fr1 = tk.Frame(root,width=620,height=500)# 创建一个容器
+fr1 = tk.Frame(root,width=600,height=500)# 创建一个容器
 fr1.configure(background='#F1EDED')
-fr1.place(x=80, y=0)
+fr1.place(x=120, y=0)
 
 dio = video()
 
@@ -76,6 +80,32 @@ height.config(textvariable=height_var)
 fill_var = tk.StringVar()
 fill_var.set("0x00")
 fill_value.config(textvariable=fill_var)
+
+text2 = tk.Text(root, height=1, width=14, relief="flat", fg="black", cursor="arrow")
+text2.place(x=Text_x_Place, y=390)
+text2.insert('0.0', '')
+
+text3 = tk.Text(root, height=1, width=14, relief="flat", fg="black", cursor="arrow")
+text3.place(x=Text_x_Place, y=420)
+text3.insert('0.0', '')
+
+Pianyi = 3
+
+text_l = tk.Text(root, height=1, width=4, relief="flat", fg="black", cursor="arrow")
+text_l.place(x=Text_x_Place, y=100+Pianyi)
+text_l.insert('0.0', '长：')
+
+text_h = tk.Text(root, height=1, width=4, relief="flat", fg="black", cursor="arrow")
+text_h.place(x=Text_x_Place, y=130+Pianyi)
+text_h.insert('0.0', '宽：')
+
+text_s = tk.Text(root, height=1, width=4, relief="flat", fg="black", cursor="arrow")
+text_s.place(x=Text_x_Place, y=330+Pianyi)
+text_s.insert('0.0', '补充字节：')
+
+text_r = tk.Text(root, height=1, width=4, relief="flat", fg="black", cursor="arrow")
+text_r.place(x=Text_x_Place, y=360+Pianyi)
+text_r.insert('0.0', '片容量：')
 
 def photo_process(i_img):
     global outputstring
@@ -113,6 +143,11 @@ def open(e):
     g_img.open(image)
     image1 = ImageTk.PhotoImage(g_img.image)
     label.configure(image = image1)
+
+    text2.delete('1.0', tk.END)
+    text2.insert('0.0', f'帧率:{dio.fps}')
+    text3.delete('1.0', tk.END)
+    text3.insert('0.0', f'帧数:{dio.frames}')
 
     btnstart.place(x=10, y=Stn_Gray_Place)
     hide_fun(btnsave)
