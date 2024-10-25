@@ -13,10 +13,7 @@ class photo:
         self.fillvalue = '0x00'
         return
 
-    def reinit(self, file):
-        self.__open(file)
-
-    def __open(self, file):
+    def open(self, file):
         self.filename = file
         (filepath, tempfilename) = os.path.split(self.filename)# 分离路径和文件名
         (filename_noext, extension) = os.path.splitext(tempfilename)#分离文件名和后缀
@@ -27,7 +24,6 @@ class photo:
         self.length = self.image.size[0]
         self.height = self.image.size[1]
         self.image_resize = self.image
-
 
     def imagechange(self):
         if len(self.image_array.shape) == 2: # 8bit
@@ -92,6 +88,7 @@ class photo:
         content = content.replace(']', '')
 
         if fillflag:
+            print(self.num)
             while self.num > self.filesize:
                 self.filesize += self.piecesize
             filllength = self.filesize - self.num
@@ -110,6 +107,8 @@ class photo:
                     if i != 0:
                         self.fill_string += f' '
                     self.fill_string += f'{self.fillvalue},'
+                    if nextlength == 0:
+                        break
             string += self.fill_string
         string += "\n};"
 
@@ -133,6 +132,8 @@ class photo:
                     if i != 0:
                         self.fill_string += f' '
                     self.fill_string += f'{self.fillvalue},'
+                    if nextlength == 0:
+                        break
             string += self.fill_string
         string += "\n};"
         self.grayfile = string

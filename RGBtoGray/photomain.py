@@ -15,7 +15,7 @@ root = tk.Tk()  # 这个库里面有Tk()这个方法，这个方法的作用就�
 root.title('图片转数组工具')
 root.geometry("700x500+300+80")  # (宽度x高度)+(x轴+y轴)
 
-btnopen = tk.Button(root, text="打开文件", width=8, height=1, font=("黑体", 8), bg='#D8C8CE', fg="black")# 创建按钮，并且将按钮放到窗口里面
+btnopen = tk.Button(root, text="打开图片", width=8, height=1, font=("黑体", 8), bg='#D8C8CE', fg="black")# 创建按钮，并且将按钮放到窗口里面
 btnopen.place(x=10, y=30)
 btnstart = tk.Button(root, text="灰度化", width=8, height=1, font=("黑体", 8), bg='#D8C8CE', fg="black")# 创建按钮，并且将按钮放到窗口里面
 btnstart.place(x=10, y=200)
@@ -75,7 +75,7 @@ def open(e):
     global file
     global image
     file = filedialog.askopenfilename() # 只打开能选择单个文件
-    img.reinit(file)
+    img.open(file)
     image = ImageTk.PhotoImage(img.image)
     label.configure(image = image)
     hide_fun(label_gray)
