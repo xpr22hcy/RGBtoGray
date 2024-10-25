@@ -50,24 +50,20 @@ fr1 = tk.Frame(root,width=620,height=500)# 创建一个容器
 fr1.configure(background='#F1EDED')
 fr1.place(x=80, y=0)
 
-file = filedialog.askopenfilename() # 只打开能选择单个文件
+img = photo()
 
-img = photo(file)
-
-image = ImageTk.PhotoImage(img.image)
 # 创建Label对象，并将图片对象传递给它
-label = tk.Label(fr1, image=image)
+label = tk.Label(fr1)
 # 显示Label对象
 label.place(x=0, y=0)
-image_gray = ImageTk.PhotoImage(img.image)
-label_gray = tk.Label(fr1, image=image_gray)
+label_gray = tk.Label(fr1)
 hide_fun(label_gray)
 
 length_var = tk.StringVar()
-length_var.set(img.length)
+length_var.set('')
 length.config(textvariable=length_var)
 height_var = tk.StringVar()
-height_var.set(img.height)
+height_var.set('')
 height.config(textvariable=height_var)
 fill_var = tk.StringVar()
 fill_var.set(img.fillvalue)
@@ -86,6 +82,10 @@ def open(e):
     btnstart.place(x=10, y=200)
     hide_fun(btnsave)
     hide_fun(btnsave2)
+    length_var.set(img.length)
+    length.config(textvariable=length_var)
+    height_var.set(img.height)
+    height.config(textvariable=height_var)
 
 def start(e):
     global image_gray

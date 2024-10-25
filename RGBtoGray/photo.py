@@ -7,8 +7,11 @@ import numpy as np
 NEWPHOTONAME = 'Gray_'
 
 class photo:
-    def __init__(self, file):
-        self.__open(file)
+    def __init__(self):
+        self.piecesize = 2048
+        self.filesize = self.piecesize
+        self.fillvalue = '0x00'
+        return
 
     def reinit(self, file):
         self.__open(file)
@@ -24,9 +27,7 @@ class photo:
         self.length = self.image.size[0]
         self.height = self.image.size[1]
         self.image_resize = self.image
-        self.piecesize = 2048
-        self.filesize = self.piecesize
-        self.fillvalue = '0x00'
+
 
     def imagechange(self):
         if len(self.image_array.shape) == 2: # 8bit
