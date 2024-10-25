@@ -28,9 +28,9 @@ length.place(x=10, y=100)
 height = tk.Entry(root, width=8)
 height.place(x=10, y=130)
 
-text1 = tk.Text(root, height=1, width=8, relief="flat", fg="red", cursor="arrow")
+text1 = tk.Text(root, height=1, width=8, relief="flat", fg="black", cursor="arrow")
 text1.place(x=10, y=70)
-text1.delete('1.0', tk.END)
+text1.insert('0.0', 'size:')
 text1_var = tk.StringVar()
 
 fill = tk.StringVar()
@@ -138,9 +138,11 @@ def length_update(e):
     text1.delete('1.0', tk.END)
     try:
         img.resizeimg(True)
-        text1.delete('1.0', tk.END)
+        text1.insert('0.0', 'size:')
+        text1.configure(fg="black")
     except:
         text1.insert('0.0', 'error')
+        text1.configure(fg="red")
     height_var.set(img.height)
     height.config(textvariable=height_var)
     image = ImageTk.PhotoImage(img.image_resize)
@@ -159,11 +161,14 @@ def height_update(e):
         height.delete(0, 'end')
         return
     img.height = int(height.get())
+    text1.delete('1.0', tk.END)
     try:
         img.resizeimg(False)
-        text1.delete('1.0', tk.END)
+        text1.insert('0.0', 'size:')
+        text1.configure(fg="black")
     except:
         text1.insert('0.0', 'error')
+        text1.configure(fg="red")
     length_var.set(img.length)
     length.config(textvariable=length_var)
     image = ImageTk.PhotoImage(img.image_resize)
