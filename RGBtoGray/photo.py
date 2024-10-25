@@ -11,6 +11,8 @@ class photo:
         self.piecesize = 2048
         self.filesize = self.piecesize
         self.fillvalue = '0x00'
+        self.fillflag = True
+        self.reversal = True
         return
 
     def open(self, file):
@@ -55,7 +57,7 @@ class photo:
             self.image_gray = self.image_resize.convert('L')
             self.image_array = np.array(self.image_gray)
 
-    def __save_gray(self, fillflag):
+    def save_gray(self):
         self.num = self.image_gray.size[0] * self.image_gray.size[1]
 
         self.array_bytes = []
@@ -78,56 +80,39 @@ class photo:
                 m += 1
             s += 1
             self.array_bytes.append(array)
-        self.__generate(fillflag)
+        if self.reversal:
+            self.__generate(self.array_bytes_column)
+        else:
+            self.__generate(self.array_bytes)
 
-    def __generate(self, fillflag):
-        content = str(self.array_bytes)
+    def __generate(self, Gray_bytes):
+        content = str(Gray_bytes)
         content = content.replace('\'', '')
         content = content.replace('], [', ',\n')
         content = content.replace('[', '')
         content = content.replace(']', '')
 
-        if fillflag:
+        if self.fillflag:
             print(self.num)
             while self.num > self.filesize:
                 self.filesize += self.piecesize
             filllength = self.filesize - self.num
             self.num = self.filesize
 
+        if self.reversal:
+            linelength = self.image_gray.size[1]
+        else:
+            linelength = self.image_gray.size[0]
+
         string = f'const unsigned char gImage_[{self.num}] = '
         string += "{\n"
         string += content
-        if fillflag:
+        if self.fillflag:
             self.fill_string = ','
             nextlength = filllength
             while nextlength > 0:
                 self.fill_string += '\n'
-                for i in range(self.image_gray.size[0]):
-                    nextlength -= 1
-                    if i != 0:
-                        self.fill_string += f' '
-                    self.fill_string += f'{self.fillvalue},'
-                    if nextlength == 0:
-                        break
-            string += self.fill_string
-        string += "\n};"
-
-        content = str(self.array_bytes_column)
-        content = content.replace('\'', '')
-        content = content.replace('], [', ',\n')
-        content = content.replace('[', '')
-        content = content.replace(']', '')
-
-        string += f'\n\n/* 在原数组的基础上行与列交换过的数组 */ '
-        string += f'\nconst unsigned char gImage_column[{self.num}] = '
-        string += "{\n"
-        string += content
-        if fillflag:
-            self.fill_string = ','
-            nextlength = filllength
-            while nextlength > 0:
-                self.fill_string += '\n'
-                for i in range(self.image_gray.size[1]):
+                for i in range(linelength):
                     nextlength -= 1
                     if i != 0:
                         self.fill_string += f' '
@@ -138,13 +123,13 @@ class photo:
         string += "\n};"
         self.grayfile = string
 
-    def outosavefile(self, fillflag):
-        self.__save_gray(fillflag)
+    def outosavefile(self):
+        self.save_gray()
         writeFile(self.generatefilepath + self.generatefilename, 'w+', self.grayfile, end='')
         print("已生成文件")
 
-    def savefile(self, name, fillflag):
-        self.__save_gray(fillflag)
+    def savefile(self, name):
+        self.save_gray()
         writeFile(name, 'w+', self.grayfile, end='')
         print("已生成文件")
         # self.image.save(self.NEWPHOTOPATH)

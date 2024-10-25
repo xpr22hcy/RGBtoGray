@@ -5,6 +5,10 @@ from tkinter import ttk
 from photo import photo
 from tkinter import filedialog
 
+Stn_Gray_Place = 170
+Stn_save2_Place = 200
+Stn_save_Place = 230
+
 def del_fun(component):
     component.destroy()
 
@@ -18,7 +22,7 @@ root.geometry("700x500+300+80")  # (宽度x高度)+(x轴+y轴)
 btnopen = tk.Button(root, text="打开图片", width=8, height=1, font=("黑体", 8), bg='#D8C8CE', fg="black")# 创建按钮，并且将按钮放到窗口里面
 btnopen.place(x=10, y=30)
 btnstart = tk.Button(root, text="灰度化", width=8, height=1, font=("黑体", 8), bg='#D8C8CE', fg="black")# 创建按钮，并且将按钮放到窗口里面
-btnstart.place(x=10, y=200)
+btnstart.place(x=10, y=Stn_Gray_Place)
 btnsave = tk.Button(root, text="自动保存", width=8, height=1, font=("黑体", 8), bg='#D8C8CE', fg="black")# 创建按钮，并且将按钮放到窗口里面
 hide_fun(btnsave)
 btnsave2 = tk.Button(root, text="另存为", width=8, height=1, font=("黑体", 8), bg='#D8C8CE', fg="black")# 创建按钮，并且将按钮放到窗口里面
@@ -35,7 +39,7 @@ text1_var = tk.StringVar()
 
 fill = tk.StringVar()
 fillone = tk.Checkbutton(root, text="填充", variable=fill, onvalue="填充",offvalue="不填充")
-fill.set("不填充")
+fill.set("填充")
 fillone.place(x=10, y=310)
 
 fill_value = tk.Entry(root, width=8)
@@ -45,6 +49,11 @@ com = ttk.Combobox(root, width=6)     #创建下拉菜单
 com.place(x=10, y=360)
 com["value"] = ("128", "256", "1024", "2048", "4096")    #给下拉菜单设定值
 com.current(3)     #设定下拉菜单的默认值为第3个
+
+reversal = tk.StringVar()
+reversalone = tk.Checkbutton(root, text="行列反转", variable=reversal, onvalue="反转",offvalue="不反转")
+reversal.set("反转")
+reversalone.place(x=10, y=290)
  
 fr1 = tk.Frame(root,width=620,height=500)# 创建一个容器
 fr1.configure(background='#F1EDED')
@@ -79,7 +88,7 @@ def open(e):
     image = ImageTk.PhotoImage(img.image)
     label.configure(image = image)
     hide_fun(label_gray)
-    btnstart.place(x=10, y=200)
+    btnstart.place(x=10, y=Stn_Gray_Place)
     hide_fun(btnsave)
     hide_fun(btnsave2)
     length_var.set(img.length)
@@ -97,32 +106,34 @@ def start(e):
     # 创建Label对象，并将图片对象传递给它
     label_gray.configure(image = image_gray)
     # 显示Label对象
-    btnsave.place(x=10, y=280)
-    btnsave2.place(x=10, y=240)
+    btnsave.place(x=10, y=Stn_save_Place)
+    btnsave2.place(x=10, y=Stn_save2_Place)
     hide_fun(btnstart)
 
-def save(e):
+def pre_save():
     img.piecesize = int(com.get())
     fillstr = fill.get()
     img.fillvalue = fill_value.get()
     if fillstr == '填充':
-        fillflag = True
+        img.fillflag = True
     else:
-        fillflag = False
-    img.outosavefile(fillflag)
+        img.fillflag = False
+    reversalonestr = reversal.get()
+    if reversalonestr == '反转':
+        img.reversal = True
+    else:
+        img.reversal = False
+
+def save(e):
+    pre_save()
+    img.outosavefile()
 
 def save2(e):
-    img.piecesize = int(com.get())
-    fillstr = fill.get()
-    img.fillvalue = fill_value.get()
-    if fillstr == '填充':
-        fillflag = True
-    else:
-        fillflag = False
+    pre_save()
     files = [('Text Document', '*.c'), ('All Files', '*.*')] # 文件过滤器
     filenewpath = filedialog.asksaveasfilename(filetypes=files, defaultextension='.c')  # 设置保存文件，并返回文件名，指定文件名后缀为.c
     if filenewpath.strip() != '':
-        img.savefile(filenewpath, fillflag)
+        img.savefile(filenewpath)
     else:
         print("do not save file")
 
