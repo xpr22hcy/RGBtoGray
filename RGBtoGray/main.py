@@ -1,82 +1,194 @@
-from alanbasepy import *
-import os
-from PIL import Image
-import numpy as np
-np.set_printoptions(threshold=np.inf) #设置打印不省略
+import os, signal
+import tkinter as tk
+from PIL import ImageTk
+from tkinter import ttk
+from photo import photo
+from tkinter import filedialog
 
-FILENAME = 'array_bytes.c'
-NEWPHOTONAME = 'Gray_'
+def del_fun(component):
+    component.destroy()
 
-Cfg = AlanCfg('./')
-if 'True' == Cfg.getConfStr('photo', 'UseTkWindow', 'True'):
-    # 使用 Tk 窗口获取文件路径及文件名
-    filename = tkGetOpenfileFullName()
+def hide_fun(component):
+    component.place(x=-1000, y=-1000)
 
-(filepath, tempfilename) = os.path.split(filename)# 分离路径和文件名
-(filename_noext, extension) = os.path.splitext(tempfilename)#分离文件名和后缀
-generatefilepath = "./" + filename_noext +"/"
-NEWPHOTOPATH = generatefilepath + NEWPHOTONAME + tempfilename
+root = tk.Tk()  # 这个库里面有Tk()这个方法，这个方法的作用就是创建一个窗口
+root.title('图片转数组工具')
+root.geometry("700x500+300+80")  # (宽度x高度)+(x轴+y轴)
 
-image = Image.open(filename)
-image_array = np.array(image)
-if len(image_array.shape) == 3:
-    if image_array.shape[2] == 2: # 16bit
-        image = image.convert('L')
-        image_array = np.array(image)
-    elif image_array.shape[2] == 3: # 24bit
-        image = image.convert('L')
-        image_array = np.array(image)
+btnopen = tk.Button(root, text="打开文件", width=8, height=1, font=("黑体", 8), bg='#D8C8CE', fg="black")# 创建按钮，并且将按钮放到窗口里面
+btnopen.place(x=10, y=30)
+btnstart = tk.Button(root, text="灰度化", width=8, height=1, font=("黑体", 8), bg='#D8C8CE', fg="black")# 创建按钮，并且将按钮放到窗口里面
+btnstart.place(x=10, y=200)
+btnsave = tk.Button(root, text="自动保存", width=8, height=1, font=("黑体", 8), bg='#D8C8CE', fg="black")# 创建按钮，并且将按钮放到窗口里面
+hide_fun(btnsave)
+btnsave2 = tk.Button(root, text="另存为", width=8, height=1, font=("黑体", 8), bg='#D8C8CE', fg="black")# 创建按钮，并且将按钮放到窗口里面
+hide_fun(btnsave2)
+length = tk.Entry(root, width=8)
+length.place(x=10, y=100)
+height = tk.Entry(root, width=8)
+height.place(x=10, y=130)
 
-num = image_array.shape[0] * image_array.shape[1]
+text1 = tk.Text(root, height=1, width=8, relief="flat", fg="red", cursor="arrow")
+text1.place(x=10, y=70)
+text1.delete('1.0', tk.END)
+text1_var = tk.StringVar()
 
-array_bytes = []
-array_bytes_column = []
+fill = tk.StringVar()
+fillone = tk.Checkbutton(root, text="填充", variable=fill, onvalue="填充",offvalue="不填充")
+fill.set("不填充")
+fillone.place(x=10, y=310)
 
-s = 0
-for i in image_array:
-    array = []
-    m = 0
-    for j in i:
-        stri = hex(image_array[s][m])
-        stri = stri[2:].zfill(2)
-        stri = f'0x{stri}'
-        array.append(stri)
+fill_value = tk.Entry(root, width=8)
+fill_value.place(x=10, y=330)
 
-        if s == 0:
-            array_bytes_column.append([])
-        array_bytes_column[m].append(stri)
+com = ttk.Combobox(root, width=6)     #创建下拉菜单
+com.place(x=10, y=360)
+com["value"] = ("128", "256", "1024", "2048", "4096")    #给下拉菜单设定值
+com.current(3)     #设定下拉菜单的默认值为第3个
+ 
+fr1 = tk.Frame(root,width=620,height=500)# 创建一个容器
+fr1.configure(background='#F1EDED')
+fr1.place(x=80, y=0)
 
-        m += 1
-    s += 1
-    array_bytes.append(array)
+file = filedialog.askopenfilename() # 只打开能选择单个文件
 
-content = str(array_bytes)
-content = content.replace('\'', '')
-content = content.replace('], [', ',\n')
-content = content.replace('[', '')
-content = content.replace(']', '')
+img = photo(file)
 
-string = f'const unsigned char gImage_[{num}] = '
-string += "{\n"
-string += content
-string += "\n};"
+image = ImageTk.PhotoImage(img.image)
+# 创建Label对象，并将图片对象传递给它
+label = tk.Label(fr1, image=image)
+# 显示Label对象
+label.place(x=0, y=0)
+image_gray = ImageTk.PhotoImage(img.image)
+label_gray = tk.Label(fr1, image=image_gray)
+hide_fun(label_gray)
 
-content = str(array_bytes_column)
-content = content.replace('\'', '')
-content = content.replace('], [', ',\n')
-content = content.replace('[', '')
-content = content.replace(']', '')
+length_var = tk.StringVar()
+length_var.set(img.length)
+length.config(textvariable=length_var)
+height_var = tk.StringVar()
+height_var.set(img.height)
+height.config(textvariable=height_var)
+fill_var = tk.StringVar()
+fill_var.set(img.fillvalue)
+fill_value.config(textvariable=fill_var)
 
-string += f'\n\n/* 在原数组的基础上行与列交换过的数组 */ '
-string += f'\nconst unsigned char gImage_column[{num}] = '
-string += "{\n"
-string += content
-string += "\n};"
+gray_flag = False
 
-mkUserDir(generatefilepath)
-delPathAllFile(generatefilepath)
-writeFile(generatefilepath + FILENAME, 'w+', string, end='')
-print("已生成测试步骤文件")
+def open(e):
+    global file
+    global image
+    file = filedialog.askopenfilename() # 只打开能选择单个文件
+    img.reinit(file)
+    image = ImageTk.PhotoImage(img.image)
+    label.configure(image = image)
+    hide_fun(label_gray)
+    btnstart.place(x=10, y=200)
+    hide_fun(btnsave)
+    hide_fun(btnsave2)
 
-image.save(NEWPHOTOPATH)
-print("已生成灰度图片")
+def start(e):
+    global image_gray
+    global gray_flag
+    gray_flag = True
+    img.imagechange()
+    image_gray = ImageTk.PhotoImage(img.image_gray)
+    label_gray.place(x=0, y=img.height)
+    # 创建Label对象，并将图片对象传递给它
+    label_gray.configure(image = image_gray)
+    # 显示Label对象
+    btnsave.place(x=10, y=280)
+    btnsave2.place(x=10, y=240)
+    hide_fun(btnstart)
+
+def save(e):
+    img.piecesize = int(com.get())
+    fillstr = fill.get()
+    img.fillvalue = fill_value.get()
+    if fillstr == '填充':
+        fillflag = True
+    else:
+        fillflag = False
+    img.outosavefile(fillflag)
+
+def save2(e):
+    img.piecesize = int(com.get())
+    fillstr = fill.get()
+    img.fillvalue = fill_value.get()
+    if fillstr == '填充':
+        fillflag = True
+    else:
+        fillflag = False
+    files = [('Text Document', '*.c'), ('All Files', '*.*')] # 文件过滤器
+    filenewpath = filedialog.asksaveasfilename(filetypes=files, defaultextension='.c')  # 设置保存文件，并返回文件名，指定文件名后缀为.c
+    if filenewpath.strip() != '':
+        img.savefile(filenewpath, fillflag)
+    else:
+        print("do not save file")
+
+def length_update(e):
+    global image
+    global image_gray
+    if length.get() == '':
+        return
+    if length.get().isdigit() == False:
+        length.delete(0, 'end')
+        return
+    img.length = int(length.get())
+    text1.delete('1.0', tk.END)
+    try:
+        img.resizeimg(True)
+        text1.delete('1.0', tk.END)
+    except:
+        text1.insert('0.0', 'error')
+    height_var.set(img.height)
+    height.config(textvariable=height_var)
+    image = ImageTk.PhotoImage(img.image_resize)
+    label.configure(image = image)
+    if gray_flag:
+        image_gray = ImageTk.PhotoImage(img.image_gray)
+        label_gray.place(x=0, y=img.height)
+        label_gray.configure(image = image_gray)
+
+def height_update(e):
+    global image
+    global image_gray
+    if height.get() == '':
+        return
+    if height.get().isdigit() == False:
+        height.delete(0, 'end')
+        return
+    img.height = int(height.get())
+    try:
+        img.resizeimg(False)
+        text1.delete('1.0', tk.END)
+    except:
+        text1.insert('0.0', 'error')
+    length_var.set(img.length)
+    length.config(textvariable=length_var)
+    image = ImageTk.PhotoImage(img.image_resize)
+    label.configure(image = image)
+    if gray_flag:
+        image_gray = ImageTk.PhotoImage(img.image_gray)
+        label_gray.place(x=0, y=img.height)
+        label_gray.configure(image = image_gray)
+
+def xFunc(e):
+    print(com.get())            #获取选中的值方法1
+
+def exit_all():
+    del_fun(root)
+    pid = os.getpid() # 获取当前进程的PID
+    os.kill(pid, signal.SIGTERM) # 主动结束指定ID的程序运行
+
+btnopen.bind("<Button-1>", open)
+btnstart.bind("<Button-1>", start)  # 将按钮和方法进行绑定，也就是创建了一个事件
+btnsave.bind("<Button-1>", save)  # 将按钮和方法进行绑定，也就是创建了一个事件
+btnsave2.bind("<Button-1>", save2)  # 将按钮和方法进行绑定，也就是创建了一个事件
+length.bind("<KeyRelease>", length_update)
+height.bind("<KeyRelease>", height_update)
+com.bind("<<ComboboxSelected>>", xFunc)     # #给下拉菜单绑定事件
+
+root.protocol("WM_DELETE_WINDOW", exit_all)
+
+root.mainloop()  # 让窗口一直显示，循环
