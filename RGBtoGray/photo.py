@@ -4,7 +4,8 @@ from PIL import Image
 import numpy as np
 np.set_printoptions(threshold=np.inf) #设置打印不省略
 
-NEWPHOTONAME = 'Gray_'
+FILENAME = 'Gray_'
+NEWPHOTONAME = 'Crop_'
 
 class photo:
     def __init__(self):
@@ -21,7 +22,7 @@ class photo:
         (filepath, tempfilename) = os.path.split(self.filename)# 分离路径和文件名
         (filename_noext, extension) = os.path.splitext(tempfilename)#分离文件名和后缀
         self.generatefilepath = filepath +"/"
-        self.generatefilename = NEWPHOTONAME + filename_noext + '.c'
+        self.generatefilename = filename_noext
         self.image = Image.open(self.filename)
         self.image_array = np.array(self.image)
         self.length = self.image.size[0]
@@ -109,7 +110,8 @@ class photo:
 
         string = f'const unsigned char {self.arraynmae}[{self.num}] = '
         string += "{\n"
-        string += content
+
+        self.data = content
         if self.fillflag:
             self.fill_string = ','
             nextlength = filllength
@@ -122,13 +124,15 @@ class photo:
                     self.fill_string += f'{self.fillvalue},'
                     if nextlength == 0:
                         break
-            string += self.fill_string
+            self.data += self.fill_string
+
+        string += self.data
         string += "\n};"
         self.grayfile = string
 
     def outosavefile(self):
         self.save_gray()
-        writeFile(self.generatefilepath + self.generatefilename, 'w+', self.grayfile, end='')
+        writeFile(self.generatefilepath + FILENAME + self.generatefilename + '.c', 'w+', self.grayfile, end='')
         print("已生成文件")
 
     def savefile(self, name):
