@@ -4,6 +4,7 @@ from PIL import ImageTk
 from tkinter import ttk
 from photo import photo
 from tkinter import filedialog
+from arraytobin import arraytobin
 
 Stn_Gray_Place = 170
 Stn_save2_Place = 200
@@ -59,6 +60,7 @@ fr1.configure(background='#F1EDED')
 fr1.place(x=80, y=0)
 
 img = photo()
+bin = arraytobin()
 
 # 创建Label对象，并将图片对象传递给它
 label = tk.Label(fr1)
@@ -126,6 +128,7 @@ def pre_save():
 def save(e):
     pre_save()
     img.outosavefile()
+    bin.pocess(img.Gary_name + '_Gray.c')
 
 def save2(e):
     pre_save()
@@ -133,6 +136,7 @@ def save2(e):
     filenewpath = filedialog.asksaveasfilename(filetypes=files, defaultextension='.c')  # 设置保存文件，并返回文件名，指定文件名后缀为.c
     if filenewpath.strip() != '':
         img.savefile(filenewpath)
+        bin.pocess(filenewpath)
     else:
         print("do not save file")
 

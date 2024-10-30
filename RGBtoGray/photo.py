@@ -4,9 +4,6 @@ from PIL import Image
 import numpy as np
 np.set_printoptions(threshold=np.inf) #设置打印不省略
 
-FILENAME = 'Gray_'
-NEWPHOTONAME = 'Crop_'
-
 class photo:
     def __init__(self):
         self.piecesize = 2048
@@ -21,8 +18,7 @@ class photo:
         self.filename = file
         (filepath, tempfilename) = os.path.split(self.filename)# 分离路径和文件名
         (filename_noext, extension) = os.path.splitext(tempfilename)#分离文件名和后缀
-        self.generatefilepath = filepath +"/"
-        self.generatefilename = filename_noext
+        self.Gary_name = filepath +"/" + filename_noext
         self.image = Image.open(self.filename)
         self.image_array = np.array(self.image)
         self.length = self.image.size[0]
@@ -132,7 +128,7 @@ class photo:
 
     def outosavefile(self):
         self.save_gray()
-        writeFile(self.generatefilepath + FILENAME + self.generatefilename + '.c', 'w+', self.grayfile, end='')
+        writeFile(self.Gary_name + '_Gray.c', 'w+', self.grayfile, end='')
         print("已生成文件")
 
     def savefile(self, name):

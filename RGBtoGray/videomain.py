@@ -5,6 +5,7 @@ from tkinter import ttk
 from photo import photo
 from video import video
 from tkinter import filedialog
+from arraytobin import arraytobin
 
 Text_x_Place = 10
 Stn_x_Place = 30
@@ -85,6 +86,7 @@ hide_fun(horizontal2)
 
 dio = video()
 g_img = photo()
+bin = arraytobin()
 
 length_var = tk.StringVar()
 length_var.set('')
@@ -308,7 +310,6 @@ def startcut(e):
         height_var.set(g_img.height)
         height.config(textvariable=height_var)
 
-
         btncut.configure(text='准备剪切')
         btncut.update()
         btnstart.place(x=Stn_x_Place, y=Stn_Gray_Place)
@@ -323,6 +324,7 @@ def startcut(e):
 
 def save(e):
     dio.outosavefile(outputstring)
+    bin.pocess(dio.Array_name + '_Gray.c')
     # dio.restart()
 
 def save2(e):
@@ -330,6 +332,7 @@ def save2(e):
     filenewpath = filedialog.asksaveasfilename(filetypes=files, defaultextension='.c')  # 设置保存文件，并返回文件名，指定文件名后缀为.c
     if filenewpath.strip() != '':
         dio.savefile(filenewpath, outputstring)
+        bin.pocess(filenewpath)
     else:
         print("do not save file")
     # dio.restart()

@@ -3,9 +3,9 @@ import tkinter as tk
 from PIL import ImageTk
 from tkinter import ttk
 from photo import photo
-from video import video
 from alanbasepy import *
 from tkinter import filedialog
+from arraytobin import arraytobin
 
 Text_x_Place = 10
 Stn_x_Place = 30
@@ -74,6 +74,7 @@ label = tk.Label(fr1)
 hide_fun(label)
 
 g_img = photo()
+bin = arraytobin()
 
 length_var = tk.StringVar()
 length_var.set('')
@@ -197,6 +198,7 @@ def start(e):
 
 def save(e):
     writeFile(wbfilesepath + '_Gray.c', 'w+', outputstring, end='')
+    bin.pocess(wbfilesepath + '_Gray.c')
     print("已生成文件")
 
 def save2(e):
@@ -204,10 +206,10 @@ def save2(e):
     filenewpath = filedialog.asksaveasfilename(filetypes=files, defaultextension='.c')  # 设置保存文件，并返回文件名，指定文件名后缀为.c
     if filenewpath.strip() != '':
         writeFile(filenewpath, 'w+', outputstring, end='')
+        bin.pocess(wbfilesepath)
         print("已生成文件")
     else:
         print("do not save file")
-    # dio.restart()
 
 def length_update(e):
     global image
@@ -268,7 +270,6 @@ def xFunc(e):
 
 def exit_all():
     del_fun(root)
-    dio.deletephoto()
     pid = os.getpid() # 获取当前进程的PID
     os.kill(pid, signal.SIGTERM) # 主动结束指定ID的程序运行
 

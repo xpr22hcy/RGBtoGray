@@ -2,8 +2,6 @@ import cv2
 from alanbasepy import *
 from PIL import Image
 
-NEWPHOTONAME = 'Gray_'
-
 class video:
     def __init__(self):
         self.pathSave = None
@@ -33,8 +31,7 @@ class video:
         #图片存储地址：
         self.pathSave = filepath + f'/rgb_{filename_noext}/'
         self.photoname = filename_noext
-        self.generatefilepath = filepath +"/"
-        self.generatefilename = NEWPHOTONAME + filename_noext + '.c'
+        self.Array_name = filepath + "/" + filename_noext
 
     def process(self):
         delPathAllFile(self.pathSave)
@@ -76,7 +73,7 @@ class video:
             cv2.imwrite(self.pathSave + f'Crop_{self.photoname}_{format(i+1)}.bmp', cropped)
 
     def outosavefile(self, str):
-        writeFile(self.generatefilepath + self.generatefilename, 'w+', str, end='')
+        writeFile(self.Array_name + '_Gray.c', 'w+', str, end='')
         print("已生成文件")
 
     def savefile(self, name, str):
