@@ -2,7 +2,7 @@ import os, signal
 import tkinter as tk
 from PIL import ImageTk
 from tkinter import ttk
-from photo import photo
+from photo import *
 from alanbasepy import *
 from tkinter import filedialog
 from arraytobin import arraytobin
@@ -36,6 +36,8 @@ btnsave = tk.Button(root, text="自动保存", width=8, height=1, font=("黑体"
 hide_fun(btnsave)
 btnsave2 = tk.Button(root, text="另存为", width=8, height=1, font=("黑体", 8), bg='#D8C8CE', fg="black")# 创建按钮，并且将按钮放到窗口里面
 hide_fun(btnsave2)
+btncut = tk.Button(root, text="准备剪切", width=8, height=1, font=("黑体", 8), bg='#D8C8CE', fg="black")# 创建按钮，并且将按钮放到窗口里面
+hide_fun(btncut)
 length = tk.Entry(root, width=8)
 length.place(x=Lab_x_Place, y=100)
 height = tk.Entry(root, width=8)
@@ -72,6 +74,15 @@ fr1.place(x=Frame_x_Place, y=0)
 label = tk.Label(fr1)
 # 显示Label对象
 hide_fun(label)
+
+vertical = tk.Frame(fr1, bg="red", height=1, width=1)
+vertical2 = tk.Frame(fr1, bg="red", height=1, width=1)
+horizontal = tk.Frame(fr1, bg="red", height=1, width=1)
+horizontal2 = tk.Frame(fr1, bg="red", height=1, width=1)
+hide_fun(vertical)
+hide_fun(vertical2)
+hide_fun(horizontal)
+hide_fun(horizontal2)
 
 g_img = photo()
 bin = arraytobin()
@@ -110,6 +121,12 @@ text_r.configure(state=tk.DISABLED)
 
 wbfilesepath = None
 image_z = None
+
+X1 = 0
+Y1 = 0
+X2 = 0
+Y2 = 0
+cut_flag = False
 
 def photo_process(i_img):
     global outputstring
@@ -150,12 +167,15 @@ def open(e):
     label.place(x=0, y=0)
 
     btnstart.place(x=Stn_x_Place, y=Stn_Gray_Place)
+    btncut.place(x=Stn_x_Place, y=Stn_save2_Place)
     hide_fun(btnsave)
     hide_fun(btnsave2)
     length_var.set(g_img.length)
     length.config(textvariable=length_var)
     height_var.set(g_img.height)
     height.config(textvariable=height_var)
+    btncut.configure(text='准备剪切')
+    btncut.update()
 
 def start(e):
     global outputstring
@@ -194,6 +214,100 @@ def start(e):
     btnsave.place(x=10, y=Stn_save_Place)
     btnsave2.place(x=10, y=Stn_save2_Place)
     hide_fun(btnstart)
+    hide_fun(btncut)
+    return
+
+def writeline(x1, y1, x2, y2):
+    vertical.configure(height=y2 - y1)
+    vertical2.configure(height=y2 - y1)
+    horizontal.configure(width=x2 - x1)
+    horizontal2.configure(width=x2 - x1)
+    vertical.place(x=x1+1, y=y1+1)
+    horizontal.place(x=x1+1, y=y1+1)
+    vertical2.place(x=x2+1, y=y1+1)
+    horizontal2.place(x=x1+1, y=y2+1)
+    length_var.set(x2 - x1)
+    length.config(textvariable=length_var)
+    height_var.set(y2 - y1)
+    height.config(textvariable=height_var)
+
+def fun1(e):
+    global X1
+    global Y1
+    if e.x >= 0 and e.y >= 0:
+        if e.x <= g_img.length and e.y <= g_img.height:
+            X1 = e.x
+            Y1 = e.y
+            writeline(X1, Y1, X2, Y2)
+
+def fun2(e):
+    global X2
+    global Y2
+    if e.x <= 0 and e.y <= 0:
+        if e.x >= -g_img.length and e.y >= -g_img.height:
+            X2 = e.x + g_img.length
+            Y2 = e.y + g_img.height
+            writeline(X1, Y1, X2, Y2)
+
+btn1 = tk.Button(root, text="", width=1, height=1, font=("黑体", 8), fg="black")
+hide_fun(btn1)
+btn1.bind("<B1-Motion>", fun1)
+btn2 = tk.Button(root, text="", width=1, height=1, font=("黑体", 8), fg="black")
+hide_fun(btn2)
+btn2.bind("<B1-Motion>", fun2)
+
+def startcut(e):
+    global wbfilesepath
+    global image_z
+    global cut_flag
+    global X2
+    global Y2
+    global image1
+    if cut_flag == False:
+        cut_flag = True
+        X2 = g_img.length
+        Y2 = g_img.height
+        writeline(X1, Y1, X2, Y2)
+
+        btn1.place(x=Frame_x_Place-16, y=0)
+        btn2.place(x=Frame_x_Place+2+X2, y=2+Y2)
+
+        btncut.configure(text='确定剪切')
+        btncut.update()
+        hide_fun(btnstart)
+    else:
+        cut_flag = False
+
+        mkUserDir(wbfilesepath + '_cut')
+        # 遍历所有获取到的文件
+        for wbfilepath in image_z:
+            readpath = wbfilesepath +'/'+ wbfilepath
+            cutpath = wbfilesepath + '_cut/cut_' + wbfilepath
+            PIL_crop(readpath, cutpath, X1, X2, Y1, Y2)
+
+        wbfilesepath = wbfilesepath + '_cut'
+        image_z = getAllFileName(wbfilesepath)
+        wbfilepath = wbfilesepath +'/'+ image_z[0]
+        g_img.open(wbfilepath)
+        image1 = ImageTk.PhotoImage(g_img.image)
+        label.configure(image = image1)
+        label.place(x=0, y=0)
+
+        length_var.set(g_img.length)
+        length.config(textvariable=length_var)
+        height_var.set(g_img.height)
+        height.config(textvariable=height_var)
+
+        btncut.configure(text='准备剪切')
+        btncut.update()
+        btnstart.place(x=Stn_x_Place, y=Stn_Gray_Place)
+        hide_fun(btn1)
+        hide_fun(btn2)
+        hide_fun(vertical)
+        hide_fun(horizontal)
+        hide_fun(vertical2)
+        hide_fun(horizontal2)
+
     return
 
 def save(e):
@@ -235,6 +349,7 @@ def length_update(e):
     label.configure(image = image)
 
     btnstart.place(x=Stn_x_Place, y=Stn_Gray_Place)
+    btncut.place(x=Stn_x_Place, y=Stn_Gray_Place)
     hide_fun(btnsave)
     hide_fun(btnsave2)
 
@@ -262,6 +377,7 @@ def height_update(e):
     label.configure(image = image)
 
     btnstart.place(x=Stn_x_Place, y=Stn_Gray_Place)
+    btncut.place(x=Stn_x_Place, y=Stn_Gray_Place)
     hide_fun(btnsave)
     hide_fun(btnsave2)
 
@@ -270,6 +386,8 @@ def xFunc(e):
 
 def exit_all():
     del_fun(root)
+    if wbfilesepath.find('_cut') != -1:
+        deletephoto(wbfilesepath)
     pid = os.getpid() # 获取当前进程的PID
     os.kill(pid, signal.SIGTERM) # 主动结束指定ID的程序运行
 
@@ -277,6 +395,7 @@ btnopen.bind("<Button-1>", open)
 btnstart.bind("<Button-1>", start)  # 将按钮和方法进行绑定，也就是创建了一个事件
 btnsave.bind("<Button-1>", save)  # 将按钮和方法进行绑定，也就是创建了一个事件
 btnsave2.bind("<Button-1>", save2)  # 将按钮和方法进行绑定，也就是创建了一个事件
+btncut.bind("<Button-1>", startcut)
 length.bind("<KeyRelease>", length_update)
 height.bind("<KeyRelease>", height_update)
 com.bind("<<ComboboxSelected>>", xFunc)     # #给下拉菜单绑定事件

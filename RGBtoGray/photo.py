@@ -4,6 +4,20 @@ from PIL import Image
 import numpy as np
 np.set_printoptions(threshold=np.inf) #设置打印不省略
 
+def PIL_crop(path, savepath, x1, x2, y1, y2):
+    img=Image.open(path)
+
+    #图片剪切crop(x,y,x1,y1)
+    im=img.crop((x1, y1, x2, y2))
+    
+    #保存剪切出来的图片
+    im.save(savepath)
+
+def deletephoto(path):
+    if fileExists(path):
+        delPathAllFile(path)
+        os.rmdir(path)
+
 class photo:
     def __init__(self):
         self.piecesize = 2048
